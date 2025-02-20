@@ -37,12 +37,14 @@ builder.Services.AddCors(options =>
 // 🔹 Подключение к Redis
 try
 {
-    string redisConnectionString = Environment.GetEnvironmentVariable("REDIS_URL") ?? "localhost:6379";
-    Console.WriteLine($"Connecting to Redis at {redisConnectionString}");
+    string redisUrl = Environment.GetEnvironmentVariable("REDIS_URL") ?? "localhost:6379";
+    string redisConnectionString = redisUrl.Replace("redis://default@", ""); // Убираем "redis://default@"
+    Console.WriteLine($"📌 Connecting to Redis: {redisConnectionString}");
 
     var connection = ConnectionMultiplexer.Connect(redisConnectionString);
     builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
-    Console.WriteLine("✅ Redis connected successfully!");
+    Console.WriteLine("✅ Redis connected");
+
 }
 catch (Exception ex)
 {
