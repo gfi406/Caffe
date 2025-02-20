@@ -28,7 +28,8 @@ builder.Services.AddCors(options =>
 //Connect Redis
 try
 {
-    var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
+    string redisConnectionString = Environment.GetEnvironmentVariable("REDIS_URL") ?? "localhost:6379,abortConnect=false";
+    var connection = ConnectionMultiplexer.Connect(redisConnectionString);
     builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
     Console.WriteLine("Redis ok");
 }
@@ -36,6 +37,17 @@ catch (Exception ex)
 {
     Console.WriteLine($"Error connecting to Redis: {ex.Message}");
 }
+//try
+//{
+//    var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
+//    builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
+//    Console.WriteLine("Redis ok");
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine($"Error connecting to Redis: {ex.Message}");
+//}
+
 //Swager
 builder.Services.AddSwaggerGen(options =>
 {
