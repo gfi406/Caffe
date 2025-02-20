@@ -34,7 +34,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-// 🔹 Подключение к Redis
+// ✅ Подключение к Redis
 try
 {
     string redisUrl = Environment.GetEnvironmentVariable("REDIS_URL");
@@ -45,18 +45,21 @@ try
         throw new Exception("❌ REDIS_URL is missing!");
     }
 
+    // Изменяем строку подключения
     string redisConnectionString = redisUrl.Replace("redis://default@", ""); // Убираем "redis://default@"
+    redisConnectionString += ",abortConnect=false"; // <== Добавляем abortConnect=false
+
     Console.WriteLine($"📌 Connecting to Redis: {redisConnectionString}");
 
     var connection = ConnectionMultiplexer.Connect(redisConnectionString);
     builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
     Console.WriteLine("✅ Redis connected!");
-
 }
 catch (Exception ex)
 {
     Console.WriteLine($"❌ Error connecting to Redis: {ex.Message}");
 }
+
 
 // 🔹 Swagger
 builder.Services.AddSwaggerGen(options =>
