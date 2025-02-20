@@ -37,13 +37,20 @@ builder.Services.AddCors(options =>
 // 🔹 Подключение к Redis
 try
 {
-    string redisUrl = Environment.GetEnvironmentVariable("REDIS_URL") ?? "localhost:6379";
+    string redisUrl = Environment.GetEnvironmentVariable("REDIS_URL");
+    Console.WriteLine($"📌 REDIS_URL: {redisUrl}");
+
+    if (string.IsNullOrEmpty(redisUrl))
+    {
+        throw new Exception("❌ REDIS_URL is missing!");
+    }
+
     string redisConnectionString = redisUrl.Replace("redis://default@", ""); // Убираем "redis://default@"
     Console.WriteLine($"📌 Connecting to Redis: {redisConnectionString}");
 
     var connection = ConnectionMultiplexer.Connect(redisConnectionString);
     builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
-    Console.WriteLine("✅ Redis connected");
+    Console.WriteLine("✅ Redis connected!");
 
 }
 catch (Exception ex)
@@ -120,5 +127,5 @@ static string ConvertPostgresUrlToConnectionString(string url)
     var uri = new Uri(url);
     var userInfo = uri.UserInfo.Split(':');
 
-    return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Require";
+    return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Disable";
 }
