@@ -142,7 +142,7 @@ namespace Caffe.Controllers
         }
 
         [HttpDelete("user/{userId}/remove-item/{itemId}")]
-        [SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины его идентификатору.")]
+        [SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины по его идентификатору.")]
         [SwaggerResponse(200, "Товар успешно удален")]
         [SwaggerResponse(404, "Товар не найден")]
         public async Task<ActionResult<CartDto>> RemoveItemFromCart(Guid userId, Guid itemId)

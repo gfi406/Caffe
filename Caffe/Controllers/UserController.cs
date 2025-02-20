@@ -22,9 +22,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
-        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
-        [SwaggerResponse(404, "Корзина не найдена")]
+        [SwaggerOperation(Summary = "Получить всех пользователей", Description = "Возвращает информацию всех пользователях.")]
+        [SwaggerResponse(200, "Пользователь успешно возвращен", typeof(UserDto))]
+        [SwaggerResponse(404, "Пользователь не найден")]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
             var users = await _userService.GetUsersAsync();
@@ -44,9 +44,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
-        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
-        [SwaggerResponse(404, "Корзина не найдена")]
+        [SwaggerOperation(Summary = "Получить пользователя идентификатору", Description = "Возвращает информацию о пользователе по идентификатору.")]
+        [SwaggerResponse(200, "Пользователь успешно возвращен", typeof(UserDto))]
+        [SwaggerResponse(404, "Пользователь не найден")]
         public async Task<ActionResult<UserDto>> GetUserById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -71,9 +71,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPost]
-        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
-        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
-        [SwaggerResponse(404, "Корзина не найдена")]
+        [SwaggerOperation(Summary = "Добавить пользователя", Description = "Добавляет нового пользователя в систему.")]
+        [SwaggerResponse(200, "Пользователь успешно добавлен", typeof(UserDto))]
+        [SwaggerResponse(404, "Пользователь не найден")]
         public async Task<ActionResult<UserDto>> AddUser(UserCreateUpdateDto userCreateDto)
         {
             var user = new User
@@ -102,9 +102,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPut("{id}")]
-        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
-        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
-        [SwaggerResponse(404, "Корзина не найдена")]
+        [SwaggerOperation(Summary = "Изменить пользователя идентификатору", Description = "Изменяет информацию о пользователе по идентификатору.")]
+        [SwaggerResponse(200, "Пользователь успешно изменен", typeof(UserDto))]
+        [SwaggerResponse(404, "Пользователь не найден")]
         public async Task<ActionResult<UserDto>> UpdateUser(Guid id, UserCreateUpdateDto userUpdateDto)
         {
             var existingUser = await _userService.GetUserByIdAsync(id);
@@ -143,9 +143,9 @@ namespace Caffe.Controllers
         }
 
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины его идентификатору.")]
-        [SwaggerResponse(200, "Товар успешно удален")]
-        [SwaggerResponse(404, "Товар не найден")]
+        [SwaggerOperation(Summary = "Удалить пользователя", Description = "Удаляет пользователя по его идентификатору.")]
+        [SwaggerResponse(200, "Пользователь успешно удален")]
+        [SwaggerResponse(404, "Пользователь не найден")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Caffe.Models.Dto;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Caffe.Controllers
 {
@@ -23,6 +24,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(Summary = "Получить всех заказов", Description = "Возвращает информацию всех заказах.")]
+        [SwaggerResponse(200, "Заказ успешно возвращен", typeof(OrderDto))]
+        [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<List<OrderDto>>> GetAllOrders()
         {
             var orders = await _orderService.GetOrdersAsync();
@@ -51,6 +55,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Получить заказ по идентефикатору", Description = "Возвращает информацию о  заказе по идентефикатору.")]
+        [SwaggerResponse(200, "Заказ успешно возвращен", typeof(OrderDto))]
+        [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<OrderDto>> GetOrderById(Guid id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
@@ -84,6 +91,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet("user/{userId}")]
+        [SwaggerOperation(Summary = "Получить заказ пользователя", Description = "Возвращает информацию о заказе пользователя по идентефикатору пользователя.")]
+        [SwaggerResponse(200, "Заказ успешно возвращен", typeof(OrderDto))]
+        [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<List<OrderDto>>> GetOrdersByUserId(Guid userId)
         {
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
@@ -112,6 +122,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPost]
+        [SwaggerOperation(Summary = "Добавляет заказ", Description = "Добавляет заказ в систему.")]
+        [SwaggerResponse(200, "Заказ успешно создан", typeof(OrderDto))]
+        [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<OrderDto>> CreateOrder(OrderCreateDto orderCreateDto)
         {
             var cart = await _cartService.GetCartByIdAsync(orderCreateDto.CartId);
@@ -166,6 +179,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPut("{id}/status")]
+        [SwaggerOperation(Summary = "Изменяет статус заказа", Description = "Возвращает информацию о статусе заказа.")]
+        [SwaggerResponse(200, "Статус заказа успешно изменен", typeof(OrderDto))]
+        [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<OrderDto>> UpdateOrderStatus(Guid id, OrderStatusUpdateDto statusUpdateDto)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
@@ -202,6 +218,9 @@ namespace Caffe.Controllers
         }
 
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Удалить заказ", Description = "Удаляет заказ по его идентификатору.")]
+        [SwaggerResponse(200, "Заказ успешно удален")]
+        [SwaggerResponse(404, "Заказ не найден")]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
