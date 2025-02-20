@@ -2,8 +2,10 @@
 using Caffe.Service;
 using Caffe.Service.Impl;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine("Started");
 
 // Добавление контекста БД
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -11,6 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Добавление контроллеров
 builder.Services.AddControllers();
+
 
 // Добавление CORS
 builder.Services.AddCors(options =>
@@ -22,6 +25,25 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
+//Connect Redis
+try
+{
+    var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
+    builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
+    Console.WriteLine("Redis ok");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error connecting to Redis: {ex.Message}");
+}
+//Swager
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations();
+    options.DocInclusionPredicate((docName, apiDesc) => true);
+});
+
+
 // Регистрация сервисов
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -32,7 +54,12 @@ builder.Services.AddScoped<IMenuItemService, MenuItemService>(); // Исправ
 builder.Services.AddEndpointsApiExplorer();
 
 
+Console.WriteLine("Building");
 var app = builder.Build();
+Console.WriteLine("Building ok");
+app.UseRouting();
+Console.WriteLine("Routing ok");
+
 
 // Инициализация базы данных
 using (var scope = app.Services.CreateScope())
@@ -53,6 +80,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 
 // Применение CORS
 app.UseCors("AllowAll");
@@ -64,6 +97,10 @@ app.UseRouting();
 // app.UseAuthorization();
 
 app.MapControllers();
+Console.WriteLine("Controllers ok");
+
+Console.WriteLine("App running");
 app.MapGet("/", () => "Hello World!");
 
 app.Run();
+Console.WriteLine("App Run!");

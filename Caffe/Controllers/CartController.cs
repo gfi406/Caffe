@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Caffe.Models.Dto;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Caffe.Controllers
 {
@@ -23,6 +24,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
+        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(CartDto))]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<CartDto>> GetCartById(Guid id)
         {
             var cart = await _cartService.GetCartByIdAsync(id);
@@ -52,6 +56,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet("user/{userId}")]
+        [SwaggerOperation(Summary = "Получить корзину пользователя по идентификатору пользователя", Description = "Возвращает  корзину пользователя по идентификатору пользователя.")]
+        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(CartDto))]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<CartDto>> GetCartByUserId(Guid userId)
         {
             var cart = await _cartService.GetCartByUserIdAsync(userId);
@@ -81,6 +88,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPost("user/{userId}/add-item")]
+        [SwaggerOperation(Summary = "Добавить товар в корзину", Description = "Добавляет новую позицию меню в корзину.")]
+        [SwaggerResponse(201, "Товар успешно добавлен", typeof(CartDto))]
+        [SwaggerResponse(400, "Ошибка при добавлении товара")]
         public async Task<ActionResult<CartDto>> AddItemToCart(Guid userId, AddToCartDto addToCartDto)
         {
             var cart = await _cartService.GetCartByUserIdAsync(userId);
@@ -132,6 +142,9 @@ namespace Caffe.Controllers
         }
 
         [HttpDelete("user/{userId}/remove-item/{itemId}")]
+        [SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины его идентификатору.")]
+        [SwaggerResponse(200, "Товар успешно удален")]
+        [SwaggerResponse(404, "Товар не найден")]
         public async Task<ActionResult<CartDto>> RemoveItemFromCart(Guid userId, Guid itemId)
         {
             var cart = await _cartService.GetCartByUserIdAsync(userId);
@@ -175,6 +188,9 @@ namespace Caffe.Controllers
         }
 
         [HttpDelete("user/{userId}/clear")]
+        [SwaggerOperation(Summary = "Отчистка корзины", Description = "Удаляет все товары из корзины.")]
+        [SwaggerResponse(200, "Корзина очищена")]
+        [SwaggerResponse(404, "Корзина не очищена :(")]
         public async Task<ActionResult<CartDto>> ClearCart(Guid userId)
         {
             var cart = await _cartService.GetCartByUserIdAsync(userId);

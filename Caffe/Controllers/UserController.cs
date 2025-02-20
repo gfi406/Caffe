@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Caffe.Models.Dto;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Caffe.Controllers
 {
@@ -21,6 +22,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
+        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
             var users = await _userService.GetUsersAsync();
@@ -40,6 +44,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
+        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<UserDto>> GetUserById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -64,6 +71,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPost]
+        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
+        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<UserDto>> AddUser(UserCreateUpdateDto userCreateDto)
         {
             var user = new User
@@ -92,6 +102,9 @@ namespace Caffe.Controllers
         }
 
         [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Получить корзину идентификатору", Description = "Возвращает информацию о корзине по идентификатору.")]
+        [SwaggerResponse(200, "Корзина успешно возвращена", typeof(UserDto))]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<UserDto>> UpdateUser(Guid id, UserCreateUpdateDto userUpdateDto)
         {
             var existingUser = await _userService.GetUserByIdAsync(id);
@@ -130,6 +143,9 @@ namespace Caffe.Controllers
         }
 
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины его идентификатору.")]
+        [SwaggerResponse(200, "Товар успешно удален")]
+        [SwaggerResponse(404, "Товар не найден")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
