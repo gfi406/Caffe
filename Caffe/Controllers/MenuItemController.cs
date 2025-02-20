@@ -17,12 +17,12 @@ namespace Caffe.Controllers
     public class MenuItemController : ControllerBase
     {
         private readonly IMenuItemService _menuItemService;
-        private readonly IDatabase _redisDatabase;
+        //private readonly IDatabase _redisDatabase;
 
-        public MenuItemController(IMenuItemService menuItemService, IConnectionMultiplexer redisConnection)
+        public MenuItemController(IMenuItemService menuItemService)
         {
             _menuItemService = menuItemService;
-            _redisDatabase = redisConnection.GetDatabase();
+           //_redisDatabase = redisConnection.GetDatabase();
         }
         [HttpGet]
         [SwaggerOperation(Summary = "Получить меню", Description = "Возвращает меню.")]
@@ -50,14 +50,14 @@ namespace Caffe.Controllers
         [SwaggerResponse(404, "Позиция меню не найдена")]
         public async Task<ActionResult<MenuItemDto>> GetMenuItemById(Guid id)
         {
-            string cacheKey = $"menuItem:{id}";
-            var cachedMenuItem = await _redisDatabase.StringGetAsync(cacheKey);
+            //string cacheKey = $"menuItem:{id}";
+            //var cachedMenuItem = await _redisDatabase.StringGetAsync(cacheKey);
 
-            if (!cachedMenuItem.IsNullOrEmpty)
-            {
-                Console.WriteLine("Redis work!");
-                return Ok(JsonSerializer.Deserialize<MenuItemDto>(cachedMenuItem));
-            }
+            //if (!cachedMenuItem.IsNullOrEmpty)
+            //{
+            //    Console.WriteLine("Redis work!");
+            //    return Ok(JsonSerializer.Deserialize<MenuItemDto>(cachedMenuItem));
+            //}
 
             var menuItem = await _menuItemService.GetMenuItemByIdAsync(id);
             if (menuItem == null)
@@ -75,7 +75,7 @@ namespace Caffe.Controllers
                 IsAvailable = menuItem.is_availble
             };
 
-            await _redisDatabase.StringSetAsync(cacheKey, JsonSerializer.Serialize(menuItemDto), TimeSpan.FromMinutes(10));
+            //await _redisDatabase.StringSetAsync(cacheKey, JsonSerializer.Serialize(menuItemDto), TimeSpan.FromMinutes(10));
             return Ok(menuItemDto);
         }
 
@@ -105,7 +105,7 @@ namespace Caffe.Controllers
                 IsAvailable = createdMenuItem.is_availble
             };
 
-            await _redisDatabase.StringSetAsync($"menuItem:{menuItemDto.Id}", JsonSerializer.Serialize(menuItemDto), TimeSpan.FromMinutes(10));
+            //await _redisDatabase.StringSetAsync($"menuItem:{menuItemDto.Id}", JsonSerializer.Serialize(menuItemDto), TimeSpan.FromMinutes(10));
             return CreatedAtAction(nameof(GetMenuItemById), new { id = menuItemDto.Id }, menuItemDto);
         }
         [HttpPut("{id}")]
@@ -155,7 +155,7 @@ namespace Caffe.Controllers
             }
 
             await _menuItemService.DeleteMenuItemAsync(id);
-            await _redisDatabase.KeyDeleteAsync($"menuItem:{id}");
+            //await _redisDatabase.KeyDeleteAsync($"menuItem:{id}");
             return NoContent();
         }
     }
