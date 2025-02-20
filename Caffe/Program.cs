@@ -7,15 +7,24 @@ using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine("Started");
 
-// Добавление контекста БД
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// 🔹 Получаем и конвертируем строку подключения к PostgreSQL
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (string.IsNullOrEmpty(databaseUrl))
+{
+    throw new Exception("DATABASE_URL is missing!");
+}
 
-// Добавление контроллеров
+var connectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
+Console.WriteLine($"🔍 Converted Connection String: {connectionString}");
+
+// 🔹 Добавление контекста БД
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// 🔹 Добавление контроллеров
 builder.Services.AddControllers();
 
-
-// Добавление CORS
+// 🔹 Добавление CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -25,72 +34,61 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-//Connect Redis
+// 🔹 Подключение к Redis
 try
 {
-    string redisConnectionString = Environment.GetEnvironmentVariable("REDIS_URL") ?? "localhost:6379,abortConnect=false";
+    string redisConnectionString = Environment.GetEnvironmentVariable("REDIS_URL") ?? "localhost:6379";
+    Console.WriteLine($"Connecting to Redis at {redisConnectionString}");
+
     var connection = ConnectionMultiplexer.Connect(redisConnectionString);
     builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
-    Console.WriteLine("Redis ok");
+    Console.WriteLine("✅ Redis connected successfully!");
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Error connecting to Redis: {ex.Message}");
+    Console.WriteLine($"❌ Error connecting to Redis: {ex.Message}");
 }
-//try
-//{
-//    var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
-//    builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
-//    Console.WriteLine("Redis ok");
-//}
-//catch (Exception ex)
-//{
-//    Console.WriteLine($"Error connecting to Redis: {ex.Message}");
-//}
 
-//Swager
+// 🔹 Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations();
     options.DocInclusionPredicate((docName, apiDesc) => true);
 });
 
-
-// Регистрация сервисов
+// 🔹 Регистрация сервисов
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IMenuItemService, MenuItemService>(); // Исправлена кириллическая буква
+builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 
-// Swagger для тестирования API
+// 🔹 Swagger для тестирования API
 builder.Services.AddEndpointsApiExplorer();
 
-
-Console.WriteLine("Building");
+Console.WriteLine("Building...");
 var app = builder.Build();
-Console.WriteLine("Building ok");
+Console.WriteLine("✅ Building complete!");
+
 app.UseRouting();
-Console.WriteLine("Routing ok");
+Console.WriteLine("✅ Routing configured!");
 
-
-// Инициализация базы данных
+// 🔹 Инициализация базы данных
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
         dbContext.Database.CanConnect();
-        Console.WriteLine("Connection is Ok");
+        Console.WriteLine("✅ Database connection is OK!");
         var initializer = new DatabaseInitializer(dbContext);
         await initializer.InitializeAsync();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error: {ex.Message}");
+        Console.WriteLine($"❌ Database Error: {ex.Message}");
         throw new Exception("Connection error");
     }
 }
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -98,21 +96,28 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-// Применение CORS
+// 🔹 Применение CORS
 app.UseCors("AllowAll");
 
-// Маршрутизация
+// 🔹 Маршрутизация
 app.UseRouting();
 
-// Авторизация (если нужна)
-// app.UseAuthorization();
-
 app.MapControllers();
-Console.WriteLine("Controllers ok");
+Console.WriteLine("✅ Controllers initialized!");
 
-Console.WriteLine("App running");
+Console.WriteLine("🚀 App is running!");
 app.MapGet("/", () => "Hello World!");
 
 app.Run();
-Console.WriteLine("App Run!");
+
+// 🔹 Функция конвертации строки подключения PostgreSQL
+static string ConvertPostgresUrlToConnectionString(string url)
+{
+    if (string.IsNullOrEmpty(url))
+        throw new Exception("DATABASE_URL is empty!");
+
+    var uri = new Uri(url);
+    var userInfo = uri.UserInfo.Split(':');
+
+    return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Require";
+}
