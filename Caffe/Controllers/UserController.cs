@@ -70,6 +70,35 @@ namespace Caffe.Controllers
             return Ok(userDto);
         }
 
+        [HttpPost("login")]
+        [SwaggerOperation(Summary = "Вход пользователя", Description = "Аутентификация пользователя по email и паролю.")]
+        [SwaggerResponse(200, "Вход выполнен успешно", typeof(UserDto))]
+        [SwaggerResponse(401, "Неверный email или пароль")]
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        {
+            // Предполагается, что в IUserService есть метод для проверки учетных данных
+            var user = await _userService.AuthenticateUserAsync(loginDto.Email, loginDto.Password);
+
+            if (user == null)
+            {
+                return Unauthorized("Неверный email или пароль");
+            }
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Name = user.name,
+                Email = user.email,
+                Phone = user.phone,
+                IsAdmin = user.is_admin,
+                IsActive = user.is_active,
+                CartId = user.Cart?.Id,
+                OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
+            };
+
+            return Ok(userDto);
+        }
+
         [HttpPost]
         [SwaggerOperation(Summary = "Добавить пользователя", Description = "Добавляет нового пользователя в систему.")]
         [SwaggerResponse(200, "Пользователь успешно добавлен", typeof(UserDto))]
