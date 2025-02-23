@@ -63,6 +63,9 @@ namespace Caffe.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("category")
+                        .HasColumnType("integer");
+
                     b.Property<string>("description")
                         .IsRequired()
                         .HasColumnType("text");

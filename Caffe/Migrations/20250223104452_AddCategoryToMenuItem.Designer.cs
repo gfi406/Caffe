@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Caffe.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250219181032_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250223104452_AddCategoryToMenuItem")]
+    partial class AddCategoryToMenuItem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,6 +65,9 @@ namespace Caffe.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("category")
+                        .HasColumnType("integer");
 
                     b.Property<string>("description")
                         .IsRequired()

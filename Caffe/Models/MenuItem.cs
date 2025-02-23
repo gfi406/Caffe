@@ -1,4 +1,5 @@
 ﻿using Caffe.Models.Entity;
+using Caffe.Models.Enum;
 
 namespace Caffe.Models
 {
@@ -8,6 +9,7 @@ namespace Caffe.Models
         public String title { get; set; }
         public String description { get; set; }
         public String img { get; set; }
-        public int price { get; set; }   
+        public int price { get; set; }
+        public FoodCategory category { get; set; }
     }
 }

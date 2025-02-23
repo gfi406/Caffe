@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Caffe.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddCategoryToMenuItem : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,6 +61,7 @@ namespace Caffe.Migrations
                     description = table.Column<string>(type: "text", nullable: false),
                     img = table.Column<string>(type: "text", nullable: false),
                     price = table.Column<int>(type: "integer", nullable: false),
+                    category = table.Column<int>(type: "integer", nullable: false),
                     CartId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
