@@ -36,7 +36,7 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
-                image = user.image,
+                Image = user.image,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             }).ToList();
