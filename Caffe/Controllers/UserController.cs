@@ -36,6 +36,7 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
+                image = user.image,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             }).ToList();
@@ -63,6 +64,7 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
+                Image = user.image,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
@@ -92,6 +94,7 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
+                Image = user.image,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
@@ -109,10 +112,11 @@ namespace Caffe.Controllers
             {
                 name = userCreateDto.Name,
                 email = userCreateDto.Email,
-                password = userCreateDto.Password, // Note: In a real app, this should be hashed
+                password = userCreateDto.Password, 
                 phone = userCreateDto.Phone,
                 is_admin = userCreateDto.IsAdmin,
-                is_active = userCreateDto.IsActive
+                is_active = userCreateDto.IsActive,
+                image = userCreateDto.image
             };
 
             var createdUser = await _userService.AddUserAsync(user);
@@ -124,7 +128,8 @@ namespace Caffe.Controllers
                 Email = createdUser.email,
                 Phone = createdUser.phone,
                 IsAdmin = createdUser.is_admin,
-                IsActive = createdUser.is_active
+                IsActive = createdUser.is_active,
+                Image = createdUser.image
             };
 
             return CreatedAtAction(nameof(GetUserById), new { id = userDto.Id }, userDto);

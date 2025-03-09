@@ -7,6 +7,7 @@
         public string Password { get; set; }
         public string Phone { get; set; }
         public bool IsAdmin { get; set; }
+        public string image { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }
