@@ -146,6 +146,9 @@ namespace Caffe.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("image")
+                        .HasColumnType("text");
+
                     b.Property<bool>("is_active")
                         .HasColumnType("boolean");
 

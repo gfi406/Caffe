@@ -7,7 +7,7 @@ using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine("Started");
 
-// 🔹 Получаем и конвертируем строку подключения к PostgreSQL
+ //🔹 Получаем и конвертируем строку подключения к PostgreSQL
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (string.IsNullOrEmpty(databaseUrl))
 {
@@ -20,6 +20,10 @@ Console.WriteLine($"🔍 Converted Connection String: {connectionString}");
 // 🔹 Добавление контекста БД
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+//Мусор для миграций 
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 🔹 Добавление контроллеров
 builder.Services.AddControllers();

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Caffe.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250223104452_AddCategoryToMenuItem")]
-    partial class AddCategoryToMenuItem
+    [Migration("20250309212121_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -147,6 +147,9 @@ namespace Caffe.Migrations
 
                     b.Property<string>("email")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("image")
                         .HasColumnType("text");
 
                     b.Property<bool>("is_active")
