@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+
+  domain:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: domain
+      ports:
+        - "5253:8080"
+      depends_on:
+        - postgres-db
+      networks:
+        - prescription-network
+      # environment:
+      #   - ASPNETCORE_ENVIRONMENT=Production
+      #   - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=cafe;Username=gif;Password=123456
+
+
+  # Redis - кэширование
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - prescription-network
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  # PostgreSQL база данных
+  postgres-db:
+    image: postgres:16
+    container_name: prescription-system-db
+    environment:
+      POSTGRES_USER: gif
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: cafe
+    ports:
+      - "49154:5432"
+    networks:
+      - prescription-network  
+
+# Сеть для взаимодействия всех контейнеров
+networks:
+  prescription-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  redis_data:
+  elasticsearch_data:

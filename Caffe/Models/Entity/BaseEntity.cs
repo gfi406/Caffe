@@ -14,7 +14,7 @@
             UpdatedAt = DateTime.UtcNow;
         }
 
-        // Метод для обновления времени изменения
+        
         public void UpdateTimestamp()
         {
             UpdatedAt = DateTime.UtcNow;

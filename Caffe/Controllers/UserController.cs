@@ -35,8 +35,7 @@ namespace Caffe.Controllers
                 Email = user.email,
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
-                IsActive = user.is_active,
-                Image = user.image,
+                IsActive = user.is_active,               
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             }).ToList();
@@ -64,7 +63,7 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
-                Image = user.image,
+                UserIcon = user.UserIcon,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
@@ -94,7 +93,7 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
-                Image = user.image,
+                UserIcon = user.UserIcon,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
@@ -116,7 +115,7 @@ namespace Caffe.Controllers
                 phone = userCreateDto.Phone,
                 is_admin = userCreateDto.IsAdmin,
                 is_active = userCreateDto.IsActive,
-                image = userCreateDto.image
+                
             };
 
             var createdUser = await _userService.AddUserAsync(user);
@@ -129,11 +128,53 @@ namespace Caffe.Controllers
                 Phone = createdUser.phone,
                 IsAdmin = createdUser.is_admin,
                 IsActive = createdUser.is_active,
-                Image = createdUser.image
+                
             };
 
             return CreatedAtAction(nameof(GetUserById), new { id = userDto.Id }, userDto);
         }
+
+        [HttpPost("{id}/upload-icon")]
+        [SwaggerOperation(Summary = "Загрузить иконку пользователя", Description = "Загружает иконку пользователя в формате изображения (.jpg, .png).")]
+        [SwaggerResponse(200, "Файл успешно загружен")]
+        [SwaggerResponse(400, "Ошибка загрузки файла")]
+        public async Task<IActionResult> UploadUserIcon(Guid id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Файл не выбран");
+            }
+
+            // Разрешенные типы
+            var allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png" };
+            var allowedContentTypes = new List<string> { "image/jpeg", "image/png" };
+
+            var fileExtension = Path.GetExtension(file.FileName).ToLower();
+            var contentType = file.ContentType.ToLower();
+
+            if (!allowedExtensions.Contains(fileExtension) || !allowedContentTypes.Contains(contentType))
+            {
+                return BadRequest("Неверный формат файла. Разрешены только .jpg и .png");
+            }
+
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound("Пользователь не найден");
+            }
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                user.UserIcon = memoryStream.ToArray();
+                user.FileName = file.FileName;
+                user.ContentType = file.ContentType;
+            }
+
+            await _userService.UpdateUserAsync(user);
+            return Ok("Файл загружен");
+        }
+
 
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Изменить пользователя идентификатору", Description = "Изменяет информацию о пользователе по идентификатору.")]
