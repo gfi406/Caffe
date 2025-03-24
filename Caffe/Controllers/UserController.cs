@@ -7,6 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Caffe.Models.Dto;
 using Swashbuckle.AspNetCore.Annotations;
+using static System.Net.Mime.MediaTypeNames;
+using System;
+using System.Drawing;
+using System.IO;
 
 namespace Caffe.Controllers
 {
@@ -67,7 +71,9 @@ namespace Caffe.Controllers
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
-
+            byte[] imageBytes = user.UserIcon;
+            string outputPath = "path_to_save_image.png";
+            SaveImageFromBytes(imageBytes, outputPath);
             return Ok(userDto);
         }
 
@@ -231,6 +237,31 @@ namespace Caffe.Controllers
 
             await _userService.DeleteUserAsync(id);
             return NoContent();
+        }
+        public static void SaveImageFromBytes(byte[] imageBytes, string outputPath)
+        {
+            // Проверяем, что массив байтов не пустой
+            if (imageBytes == null || imageBytes.Length == 0)
+            {
+                throw new ArgumentException("The byte array is empty or null.", nameof(imageBytes));
+            }
+
+            // Создаем поток из байтов
+            using (var ms = new MemoryStream(imageBytes))
+            {
+                try
+                {
+                    // Указываем полное имя класса Image для работы с изображениями
+                    var image = System.Drawing.Image.FromStream(ms);
+
+                    // Сохраняем изображение в файл
+                    image.Save(outputPath);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("An error occurred while saving the image.", ex);
+                }
+            }
         }
     }
 }

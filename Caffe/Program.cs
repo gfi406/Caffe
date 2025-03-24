@@ -7,20 +7,6 @@ using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine("Started");
 
- //🔹 Получаем и конвертируем строку подключения к PostgreSQL
-//var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-//if (string.IsNullOrEmpty(databaseUrl))
-//{
-//    throw new Exception("DATABASE_URL is missing!");
-//}
-
-//var connectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
-//Console.WriteLine($"🔍 Converted Connection String: {connectionString}");
-
-//// 🔹 Добавление контекста БД
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseNpgsql(connectionString));
-
 //Мусор для миграций 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -122,14 +108,3 @@ app.MapGet("/", () => "Hello World!");
 
 app.Run();
 
-// 🔹 Функция конвертации строки подключения PostgreSQL
-//static string ConvertPostgresUrlToConnectionString(string url)
-//{
-//    if (string.IsNullOrEmpty(url))
-//        throw new Exception("DATABASE_URL is empty!");
-
-//    var uri = new Uri(url);
-//    var userInfo = uri.UserInfo.Split(':');
-
-//    return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Disable";
-//}
