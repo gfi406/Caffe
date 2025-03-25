@@ -7,6 +7,7 @@ namespace Caffe.Service
         Task<List<User>> GetUsersAsync();
         Task<User> GetUserByIdAsync(Guid id);
         Task<User> AddUserAsync(User user);
+        Task<User> AuthenticateUserAsync(string email, string password);
         Task<User> UpdateUserAsync(User user);
         Task DeleteUserAsync(Guid id);
         Task<User> GetUserByEmailAsync(string email);

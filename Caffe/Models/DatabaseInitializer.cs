@@ -26,16 +26,7 @@ public class DatabaseInitializer
 
             // Генерация пользователей
             var users = new[]
-            {
-                new User
-                {
-                    is_admin = true,
-                    is_active = true,
-                    name = "Admin User",
-                    email = "admin@caffe.com",
-                    password = "password", // В реальном проекте не хранить пароль в открытом виде
-                    phone = "123456789"
-                },
+            {                
                 new User
                 {
                     is_admin = false,

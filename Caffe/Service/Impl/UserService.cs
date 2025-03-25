@@ -20,6 +20,28 @@ namespace Caffe.Service.Impl
                 .ToListAsync();
         }
 
+        public async Task<User> AuthenticateUserAsync(string email, string password)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            // Найти пользователя по email
+            var user = await _context.Users
+                .Include(u => u.Cart)
+                .Include(u => u.Orders)
+                .FirstOrDefaultAsync(u => u.email == email && u.is_active);
+
+           
+            if (user == null || user.password != password) 
+            {
+                return null;
+            }
+
+            return user;
+        }
+
         public async Task<User> GetUserByIdAsync(Guid id)
         {
             return await _context.Users

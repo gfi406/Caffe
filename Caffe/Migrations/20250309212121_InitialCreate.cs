@@ -22,6 +22,7 @@ namespace Caffe.Migrations
                     email = table.Column<string>(type: "text", nullable: false),
                     password = table.Column<string>(type: "text", nullable: false),
                     phone = table.Column<string>(type: "text", nullable: false),
+                    image = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -61,6 +62,7 @@ namespace Caffe.Migrations
                     description = table.Column<string>(type: "text", nullable: false),
                     img = table.Column<string>(type: "text", nullable: false),
                     price = table.Column<int>(type: "integer", nullable: false),
+                    category = table.Column<int>(type: "integer", nullable: false),
                     CartId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)

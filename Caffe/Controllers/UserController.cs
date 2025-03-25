@@ -7,6 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Caffe.Models.Dto;
 using Swashbuckle.AspNetCore.Annotations;
+using static System.Net.Mime.MediaTypeNames;
+using System;
+using System.Drawing;
+using System.IO;
+using Caffe.Service.Impl;
 
 namespace Caffe.Controllers
 {
@@ -15,10 +20,12 @@ namespace Caffe.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ICartService _cartService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ICartService cartService)
         {
             _userService = userService;
+            _cartService = cartService;        
         }
 
         [HttpGet]
@@ -35,7 +42,7 @@ namespace Caffe.Controllers
                 Email = user.email,
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
-                IsActive = user.is_active,
+                IsActive = user.is_active,               
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             }).ToList();
@@ -63,6 +70,39 @@ namespace Caffe.Controllers
                 Phone = user.phone,
                 IsAdmin = user.is_admin,
                 IsActive = user.is_active,
+                UserIcon = user.UserIcon,
+                CartId = user.Cart?.Id,
+                OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
+            };
+            //byte[] imageBytes = user.UserIcon;
+            //string outputPath = "path_to_save_image.png";
+            //SaveImageFromBytes(imageBytes, outputPath);
+            return Ok(userDto);
+        }
+
+        [HttpPost("login")]
+        [SwaggerOperation(Summary = "Вход пользователя", Description = "Аутентификация пользователя по email и паролю.")]
+        [SwaggerResponse(200, "Вход выполнен успешно", typeof(UserDto))]
+        [SwaggerResponse(401, "Неверный email или пароль")]
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        {
+            // Предполагается, что в IUserService есть метод для проверки учетных данных
+            var user = await _userService.AuthenticateUserAsync(loginDto.Email, loginDto.Password);
+
+            if (user == null)
+            {
+                return Unauthorized("Неверный email или пароль");
+            }
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Name = user.name,
+                Email = user.email,
+                Phone = user.phone,
+                IsAdmin = user.is_admin,
+                IsActive = user.is_active,
+                UserIcon = user.UserIcon,
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
@@ -80,13 +120,23 @@ namespace Caffe.Controllers
             {
                 name = userCreateDto.Name,
                 email = userCreateDto.Email,
-                password = userCreateDto.Password, // Note: In a real app, this should be hashed
+                password = userCreateDto.Password,
                 phone = userCreateDto.Phone,
                 is_admin = userCreateDto.IsAdmin,
                 is_active = userCreateDto.IsActive
             };
 
             var createdUser = await _userService.AddUserAsync(user);
+
+            // Создаем корзину для нового пользователя
+            var cart = new Cart
+            {
+                user_id = createdUser.Id,
+                Items = new List<MenuItem>(), // Пустая корзина
+                totalPrice = 0
+            };
+
+            var createdCart = await _cartService.AddCartAsync(cart);
 
             var userDto = new UserDto
             {
@@ -95,11 +145,54 @@ namespace Caffe.Controllers
                 Email = createdUser.email,
                 Phone = createdUser.phone,
                 IsAdmin = createdUser.is_admin,
-                IsActive = createdUser.is_active
+                IsActive = createdUser.is_active,
+                Image = createdUser.image
             };
 
             return CreatedAtAction(nameof(GetUserById), new { id = userDto.Id }, userDto);
         }
+
+        [HttpPost("{id}/upload-icon")]
+        [SwaggerOperation(Summary = "Загрузить иконку пользователя", Description = "Загружает иконку пользователя в формате изображения (.jpg, .png).")]
+        [SwaggerResponse(200, "Файл успешно загружен")]
+        [SwaggerResponse(400, "Ошибка загрузки файла")]
+        public async Task<IActionResult> UploadUserIcon(Guid id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Файл не выбран");
+            }
+
+            // Разрешенные типы
+            var allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png" };
+            var allowedContentTypes = new List<string> { "image/jpeg", "image/png" };
+
+            var fileExtension = Path.GetExtension(file.FileName).ToLower();
+            var contentType = file.ContentType.ToLower();
+
+            if (!allowedExtensions.Contains(fileExtension) || !allowedContentTypes.Contains(contentType))
+            {
+                return BadRequest("Неверный формат файла. Разрешены только .jpg и .png");
+            }
+
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound("Пользователь не найден");
+            }
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                user.UserIcon = memoryStream.ToArray();
+                user.FileName = file.FileName;
+                user.ContentType = file.ContentType;
+            }
+
+            await _userService.UpdateUserAsync(user);
+            return Ok("Файл загружен");
+        }
+
 
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Изменить пользователя идентификатору", Description = "Изменяет информацию о пользователе по идентификатору.")]
@@ -156,6 +249,31 @@ namespace Caffe.Controllers
 
             await _userService.DeleteUserAsync(id);
             return NoContent();
+        }
+        public static void SaveImageFromBytes(byte[] imageBytes, string outputPath)
+        {
+            // Проверяем, что массив байтов не пустой
+            if (imageBytes == null || imageBytes.Length == 0)
+            {
+                throw new ArgumentException("The byte array is empty or null.", nameof(imageBytes));
+            }
+
+            // Создаем поток из байтов
+            using (var ms = new MemoryStream(imageBytes))
+            {
+                try
+                {
+                    // Указываем полное имя класса Image для работы с изображениями
+                    var image = System.Drawing.Image.FromStream(ms);
+
+                    // Сохраняем изображение в файл
+                    image.Save(outputPath);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("An error occurred while saving the image.", ex);
+                }
+            }
         }
     }
 }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Caffe.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250219181032_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250321000841_AddUserIconToUser")]
+    partial class AddUserIconToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,6 +65,9 @@ namespace Caffe.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("category")
+                        .HasColumnType("integer");
 
                     b.Property<string>("description")
                         .IsRequired()
@@ -136,14 +139,26 @@ namespace Caffe.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ContentType")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<byte[]>("UserIcon")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("email")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("image")
                         .HasColumnType("text");
 
                     b.Property<bool>("is_active")

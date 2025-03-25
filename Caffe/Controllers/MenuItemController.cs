@@ -19,11 +19,13 @@ namespace Caffe.Controllers
         private readonly IMenuItemService _menuItemService;
         private readonly IDatabase _redisDatabase;
 
-        public MenuItemController(IMenuItemService menuItemService, IConnectionMultiplexer redisConnection)
+        public MenuItemController(IMenuItemService menuItemService, IDatabase redisDatabase)
         {
             _menuItemService = menuItemService;
-            _redisDatabase = redisConnection.GetDatabase();
+            //_redisDatabase = redisConnection.GetDatabase();
+            _redisDatabase = redisDatabase;
         }
+
         [HttpGet]
         [SwaggerOperation(Summary = "Получить меню", Description = "Возвращает меню.")]
         [SwaggerResponse(200, "Список меню успешно возвращен", typeof(IEnumerable<MenuItemDto>))]
@@ -38,7 +40,8 @@ namespace Caffe.Controllers
                 Description = item.description,
                 Price = item.price,
                 ImageUrl = item.img,
-                IsAvailable = item.is_availble
+                IsAvailable = item.is_availble,
+                Category = item.category
             }).ToList();
 
             return Ok(menuItemDtos);
@@ -55,7 +58,6 @@ namespace Caffe.Controllers
 
             if (!cachedMenuItem.IsNullOrEmpty)
             {
-                Console.WriteLine("Redis work!");
                 return Ok(JsonSerializer.Deserialize<MenuItemDto>(cachedMenuItem));
             }
 
@@ -72,7 +74,8 @@ namespace Caffe.Controllers
                 Description = menuItem.description,
                 Price = menuItem.price,
                 ImageUrl = menuItem.img,
-                IsAvailable = menuItem.is_availble
+                IsAvailable = menuItem.is_availble,
+                Category = menuItem.category
             };
 
             await _redisDatabase.StringSetAsync(cacheKey, JsonSerializer.Serialize(menuItemDto), TimeSpan.FromMinutes(10));
@@ -91,7 +94,8 @@ namespace Caffe.Controllers
                 description = menuItemCreateDto.Description,
                 price = menuItemCreateDto.Price,
                 img = menuItemCreateDto.ImageUrl,
-                is_availble = menuItemCreateDto.IsAvailable
+                is_availble = menuItemCreateDto.IsAvailable,
+                category = menuItemCreateDto.Category
             };
 
             var createdMenuItem = await _menuItemService.AddMenuItemAsync(menuItem);
@@ -102,12 +106,14 @@ namespace Caffe.Controllers
                 Description = createdMenuItem.description,
                 Price = createdMenuItem.price,
                 ImageUrl = createdMenuItem.img,
-                IsAvailable = createdMenuItem.is_availble
+                IsAvailable = createdMenuItem.is_availble,
+                Category = createdMenuItem.category
             };
 
             await _redisDatabase.StringSetAsync($"menuItem:{menuItemDto.Id}", JsonSerializer.Serialize(menuItemDto), TimeSpan.FromMinutes(10));
             return CreatedAtAction(nameof(GetMenuItemById), new { id = menuItemDto.Id }, menuItemDto);
         }
+
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Обновить информацию позиции меню", Description = "Обновляет данные о позиции меню по его идентификатору.")]
         [SwaggerResponse(200, "Позиция меню успешно обновлена", typeof(MenuItemDto))]
@@ -126,6 +132,7 @@ namespace Caffe.Controllers
             existingMenuItem.price = menuItemUpdateDto.Price;
             existingMenuItem.img = menuItemUpdateDto.ImageUrl;
             existingMenuItem.is_availble = menuItemUpdateDto.IsAvailable;
+            existingMenuItem.category = menuItemUpdateDto.Category;
 
             var updatedMenuItem = await _menuItemService.UpdateMenuItemAsync(existingMenuItem);
 
@@ -136,7 +143,8 @@ namespace Caffe.Controllers
                 Description = updatedMenuItem.description,
                 Price = updatedMenuItem.price,
                 ImageUrl = updatedMenuItem.img,
-                IsAvailable = updatedMenuItem.is_availble
+                IsAvailable = updatedMenuItem.is_availble,
+                Category = updatedMenuItem.category
             };
 
             return Ok(menuItemDto);

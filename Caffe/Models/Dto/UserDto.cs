@@ -8,7 +8,10 @@
         public string Name { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        // Не включаем пароль из соображений безопасности
+        public string? Image { get; set; }
+
+        public byte[]? UserIcon { get; set; }
+
         public Guid? CartId { get; set; }
         public List<Guid> OrderIds { get; set; } = new List<Guid>();
     }
