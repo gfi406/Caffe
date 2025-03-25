@@ -123,8 +123,7 @@ namespace Caffe.Controllers
                 password = userCreateDto.Password,
                 phone = userCreateDto.Phone,
                 is_admin = userCreateDto.IsAdmin,
-                is_active = userCreateDto.IsActive,
-                image = userCreateDto.image
+                is_active = userCreateDto.IsActive
             };
 
             var createdUser = await _userService.AddUserAsync(user);
