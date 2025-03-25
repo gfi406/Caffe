@@ -11,6 +11,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System;
 using System.Drawing;
 using System.IO;
+using Caffe.Service.Impl;
 
 namespace Caffe.Controllers
 {
@@ -19,10 +20,12 @@ namespace Caffe.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ICartService _cartService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ICartService cartService)
         {
             _userService = userService;
+            _cartService = cartService;        
         }
 
         [HttpGet]
@@ -71,9 +74,9 @@ namespace Caffe.Controllers
                 CartId = user.Cart?.Id,
                 OrderIds = user.Orders?.Select(o => o.Id).ToList() ?? new List<Guid>()
             };
-            byte[] imageBytes = user.UserIcon;
-            string outputPath = "path_to_save_image.png";
-            SaveImageFromBytes(imageBytes, outputPath);
+            //byte[] imageBytes = user.UserIcon;
+            //string outputPath = "path_to_save_image.png";
+            //SaveImageFromBytes(imageBytes, outputPath);
             return Ok(userDto);
         }
 
@@ -117,14 +120,24 @@ namespace Caffe.Controllers
             {
                 name = userCreateDto.Name,
                 email = userCreateDto.Email,
-                password = userCreateDto.Password, 
+                password = userCreateDto.Password,
                 phone = userCreateDto.Phone,
                 is_admin = userCreateDto.IsAdmin,
                 is_active = userCreateDto.IsActive,
-                
+                image = userCreateDto.image
             };
 
             var createdUser = await _userService.AddUserAsync(user);
+
+            // Создаем корзину для нового пользователя
+            var cart = new Cart
+            {
+                user_id = createdUser.Id,
+                Items = new List<MenuItem>(), // Пустая корзина
+                totalPrice = 0
+            };
+
+            var createdCart = await _cartService.AddCartAsync(cart);
 
             var userDto = new UserDto
             {
@@ -134,7 +147,7 @@ namespace Caffe.Controllers
                 Phone = createdUser.phone,
                 IsAdmin = createdUser.is_admin,
                 IsActive = createdUser.is_active,
-                
+                Image = createdUser.image
             };
 
             return CreatedAtAction(nameof(GetUserById), new { id = userDto.Id }, userDto);
