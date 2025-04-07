@@ -12,6 +12,7 @@ namespace Caffe
         public DbSet<Order> Orders { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
 
 
@@ -26,7 +27,13 @@ namespace Caffe
 
             modelBuilder.Entity<Cart>()
                 .HasMany(c => c.Items)
-                .WithOne();
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId);
+
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.MenuItem)
+                .WithMany()
+                .HasForeignKey(ci => ci.MenuItemId);
 
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)

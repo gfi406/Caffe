@@ -8,6 +8,8 @@ namespace Caffe.Service
         Task<Cart> GetCartByIdAsync(Guid id);
         Task<Cart> AddCartAsync(Cart cart);
         Task<Cart> UpdateCartAsync(Cart cart);
+        Task UpdateCartTotalAsync(Guid cartId);
+        Task<CartItem> AddItemToCartAsync(Guid cartId, Guid menuItemId, int quantity, decimal price);
         Task DeleteCartAsync(Guid id);
         Task<Cart> GetCartByUserIdAsync(Guid userId);
     }

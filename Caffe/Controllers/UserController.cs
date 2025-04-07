@@ -132,7 +132,7 @@ namespace Caffe.Controllers
             var cart = new Cart
             {
                 user_id = createdUser.Id,
-                Items = new List<MenuItem>(), // Пустая корзина
+                Items = new List<CartItem>(), // Пустая корзина
                 totalPrice = 0
             };
 

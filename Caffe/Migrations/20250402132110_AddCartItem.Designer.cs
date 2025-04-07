@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Caffe.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250309212121_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250402132110_AddCartItem")]
+    partial class AddCartItem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,13 +51,40 @@ namespace Caffe.Migrations
                     b.ToTable("Carts");
                 });
 
-            modelBuilder.Entity("Caffe.Models.MenuItem", b =>
+            modelBuilder.Entity("Caffe.Models.CartItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CartId")
+                    b.Property<Guid>("CartId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MenuItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("MenuItemId");
+
+                    b.ToTable("CartItems");
+                });
+
+            modelBuilder.Entity("Caffe.Models.MenuItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -88,8 +115,6 @@ namespace Caffe.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CartId");
 
                     b.ToTable("MenuItems");
                 });
@@ -139,11 +164,20 @@ namespace Caffe.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ContentType")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("UserIcon")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("email")
                         .IsRequired()
@@ -186,11 +220,23 @@ namespace Caffe.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Caffe.Models.MenuItem", b =>
+            modelBuilder.Entity("Caffe.Models.CartItem", b =>
                 {
-                    b.HasOne("Caffe.Models.Cart", null)
+                    b.HasOne("Caffe.Models.Cart", "Cart")
                         .WithMany("Items")
-                        .HasForeignKey("CartId");
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Caffe.Models.MenuItem", "MenuItem")
+                        .WithMany()
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("MenuItem");
                 });
 
             modelBuilder.Entity("Caffe.Models.Order", b =>

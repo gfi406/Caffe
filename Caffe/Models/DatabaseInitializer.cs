@@ -1,5 +1,6 @@
 ﻿using Caffe;
 using Caffe.Models;
+using Caffe.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -49,24 +50,28 @@ public class DatabaseInitializer
                     is_availble = true,
                     title = "Espresso",
                     description = "Strong black coffee",
-                    img = "/images/espresso.jpg",
-                    price = 150
+                    img = "https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG",
+                    price = 150,
+                    category = FoodCategory.Beverage 
+
                 },
                 new MenuItem
                 {
                     is_availble = true,
                     title = "Latte",
                     description = "Coffee with steamed milk",
-                    img = "/images/latte.jpg",
-                    price = 200
+                    img = "https://nescafe.ru/sites/default/files/2024-08/GettyImages-1466623971%20%281%29.jpg",
+                    price = 200,
+                    category = FoodCategory.Beverage
                 },
                 new MenuItem
                 {
                     is_availble = true,
                     title = "Cappuccino",
                     description = "Coffee with steamed milk and foam",
-                    img = "/images/cappuccino.jpg",
-                    price = 220
+                    img = "https://lorcoffee.com/cdn/shop/articles/Cappuccino-exc.jpg?v=1684870907",
+                    price = 220,
+                    category = FoodCategory.Beverage
                 }
             };
 
@@ -79,27 +84,26 @@ public class DatabaseInitializer
             {
                 User = userJohn,
                 user_id = userJohn.Id,
-                Items = new[] { menuItems.First(m => m.title == "Latte") }.ToList(),
-                totalPrice = 200
+               
             };
 
             await _context.Carts.AddAsync(cart);
             await _context.SaveChangesAsync(); // Сохраняем корзину
 
-            // Генерация заказа для пользователя
-            var order = new Order
-            {
-                Cart = cart,
-                CartId = cart.Id,
-                User = userJohn,
-                user_id = userJohn.Id,
-                status = "Pending",
-                orderNumber = 1001,
-                paymentMethod = "Credit Card"
-            };
+            //// Генерация заказа для пользователя
+            //var order = new Order
+            //{
+            //    Cart = cart,
+            //    CartId = cart.Id,
+            //    User = userJohn,
+            //    user_id = userJohn.Id,
+            //    status = "Pending",
+            //    orderNumber = 1001,
+            //    paymentMethod = "Credit Card"
+            //};
 
-            await _context.Orders.AddAsync(order);
-            await _context.SaveChangesAsync(); // Сохраняем заказ
+            //await _context.Orders.AddAsync(order);
+            //await _context.SaveChangesAsync(); // Сохраняем заказ
         }
     }
 }

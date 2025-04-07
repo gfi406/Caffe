@@ -24,9 +24,9 @@ namespace Caffe.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Получить всех заказов", Description = "Возвращает информацию всех заказах.")]
-        [SwaggerResponse(200, "Заказ успешно возвращен", typeof(OrderDto))]
-        [SwaggerResponse(404, "Заказ не найден")]
+        [SwaggerOperation(Summary = "Получить все заказы", Description = "Возвращает информацию о всех заказах.")]
+        [SwaggerResponse(200, "Заказы успешно возвращены", typeof(List<OrderDto>))]
+        [SwaggerResponse(404, "Заказы не найдены")]
         public async Task<ActionResult<List<OrderDto>>> GetAllOrders()
         {
             var orders = await _orderService.GetOrdersAsync();
@@ -40,22 +40,23 @@ namespace Caffe.Controllers
                 PaymentMethod = order.paymentMethod,
                 TotalPrice = order.Cart?.totalPrice,
                 CreatedAt = order.CreatedAt,
-                Items = order.Cart?.Items?.Select(item => new MenuItemDto
+                Items = order.Cart?.Items?.Select(item => new MenuCartItemDto
                 {
-                    Id = item.Id,
-                    Title = item.title,
-                    Description = item.description,
-                    Price = item.price,
-                    ImageUrl = item.img,
-                    IsAvailable = item.is_availble
-                }).ToList() ?? new List<MenuItemDto>()
+                    Id = item.MenuItem.Id,
+                    Title = item.MenuItem.title,
+                    Description = item.MenuItem.description,
+                    Price = item.MenuItem.price,
+                    ImageUrl = item.MenuItem.img,
+                    IsAvailable = item.MenuItem.is_availble,
+                    Quantity = item.Quantity
+                }).ToList() ?? new List<MenuCartItemDto>()
             }).ToList();
 
             return Ok(orderDtos);
         }
 
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Получить заказ по идентефикатору", Description = "Возвращает информацию о  заказе по идентефикатору.")]
+        [SwaggerOperation(Summary = "Получить заказ по идентификатору", Description = "Возвращает информацию о заказе по идентификатору.")]
         [SwaggerResponse(200, "Заказ успешно возвращен", typeof(OrderDto))]
         [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<OrderDto>> GetOrderById(Guid id)
@@ -76,24 +77,25 @@ namespace Caffe.Controllers
                 PaymentMethod = order.paymentMethod,
                 TotalPrice = order.Cart?.totalPrice,
                 CreatedAt = order.CreatedAt,
-                Items = order.Cart?.Items?.Select(item => new MenuItemDto
+                Items = order.Cart?.Items?.Select(item => new MenuCartItemDto
                 {
-                    Id = item.Id,
-                    Title = item.title,
-                    Description = item.description,
-                    Price = item.price,
-                    ImageUrl = item.img,
-                    IsAvailable = item.is_availble
-                }).ToList() ?? new List<MenuItemDto>()
+                    Id = item.MenuItem.Id,
+                    Title = item.MenuItem.title,
+                    Description = item.MenuItem.description,
+                    Price = item.MenuItem.price,
+                    ImageUrl = item.MenuItem.img,
+                    IsAvailable = item.MenuItem.is_availble,
+                    Quantity = item.Quantity
+                }).ToList() ?? new List<MenuCartItemDto>()
             };
 
             return Ok(orderDto);
         }
 
         [HttpGet("user/{userId}")]
-        [SwaggerOperation(Summary = "Получить заказ пользователя", Description = "Возвращает информацию о заказе пользователя по идентефикатору пользователя.")]
-        [SwaggerResponse(200, "Заказ успешно возвращен", typeof(OrderDto))]
-        [SwaggerResponse(404, "Заказ не найден")]
+        [SwaggerOperation(Summary = "Получить заказы пользователя", Description = "Возвращает информацию о заказах пользователя по идентификатору пользователя.")]
+        [SwaggerResponse(200, "Заказы успешно возвращены", typeof(List<OrderDto>))]
+        [SwaggerResponse(404, "Заказы не найдены")]
         public async Task<ActionResult<List<OrderDto>>> GetOrdersByUserId(Guid userId)
         {
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
@@ -107,50 +109,51 @@ namespace Caffe.Controllers
                 PaymentMethod = order.paymentMethod,
                 TotalPrice = order.Cart?.totalPrice,
                 CreatedAt = order.CreatedAt,
-                Items = order.Cart?.Items?.Select(item => new MenuItemDto
+                Items = order.Cart?.Items?.Select(item => new MenuCartItemDto
                 {
-                    Id = item.Id,
-                    Title = item.title,
-                    Description = item.description,
-                    Price = item.price,
-                    ImageUrl = item.img,
-                    IsAvailable = item.is_availble
-                }).ToList() ?? new List<MenuItemDto>()
+                    Id = item.MenuItem.Id,
+                    Title = item.MenuItem.title,
+                    Description = item.MenuItem.description,
+                    Price = item.MenuItem.price,
+                    ImageUrl = item.MenuItem.img,
+                    IsAvailable = item.MenuItem.is_availble,
+                    Quantity = item.Quantity
+                }).ToList() ?? new List<MenuCartItemDto>()
             }).ToList();
 
             return Ok(orderDtos);
         }
 
         [HttpPost]
-        [SwaggerOperation(Summary = "Добавляет заказ", Description = "Добавляет заказ в систему.")]
+        [SwaggerOperation(Summary = "Создать заказ", Description = "Добавляет заказ в систему.")]
         [SwaggerResponse(200, "Заказ успешно создан", typeof(OrderDto))]
-        [SwaggerResponse(404, "Заказ не найден")]
+        [SwaggerResponse(400, "Невозможно создать заказ с пустой корзиной")]
+        [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<OrderDto>> CreateOrder(OrderCreateDto orderCreateDto)
         {
             var cart = await _cartService.GetCartByIdAsync(orderCreateDto.CartId);
             if (cart == null)
             {
-                return NotFound("Cart not found");
+                return NotFound("Корзина не найдена");
             }
 
             if (cart.Items == null || !cart.Items.Any())
             {
-                return BadRequest("Cannot create order with empty cart");
+                return BadRequest("Невозможно создать заказ с пустой корзиной");
             }
 
             var order = new Order
             {
                 CartId = orderCreateDto.CartId,
                 user_id = cart.user_id,
-                status = "Pending", // Initial status
+                status = "В обработке", // Начальный статус
                 paymentMethod = orderCreateDto.PaymentMethod,
-                // Order number generation logic could be more sophisticated
                 orderNumber = new Random().Next(10000, 99999)
             };
 
             var createdOrder = await _orderService.AddOrderAsync(order);
 
-            // Associate the order with the cart
+            // Связываем заказ с корзиной
             cart.Order = createdOrder;
             await _cartService.UpdateCartAsync(cart);
 
@@ -164,23 +167,24 @@ namespace Caffe.Controllers
                 PaymentMethod = createdOrder.paymentMethod,
                 TotalPrice = cart.totalPrice,
                 CreatedAt = createdOrder.CreatedAt,
-                Items = cart.Items?.Select(item => new MenuItemDto
+                Items = cart.Items.Select(item => new MenuCartItemDto
                 {
-                    Id = item.Id,
-                    Title = item.title,
-                    Description = item.description,
-                    Price = item.price,
-                    ImageUrl = item.img,
-                    IsAvailable = item.is_availble
-                }).ToList() ?? new List<MenuItemDto>()
+                    Id = item.MenuItem.Id,
+                    Title = item.MenuItem.title,
+                    Description = item.MenuItem.description,
+                    Price = item.MenuItem.price,
+                    ImageUrl = item.MenuItem.img,
+                    IsAvailable = item.MenuItem.is_availble,
+                    Quantity = item.Quantity
+                }).ToList()
             };
 
             return CreatedAtAction(nameof(GetOrderById), new { id = orderDto.Id }, orderDto);
         }
 
         [HttpPut("{id}/status")]
-        [SwaggerOperation(Summary = "Изменяет статус заказа", Description = "Возвращает информацию о статусе заказа.")]
-        [SwaggerResponse(200, "Статус заказа успешно изменен", typeof(OrderDto))]
+        [SwaggerOperation(Summary = "Обновить статус заказа", Description = "Обновляет статус заказа.")]
+        [SwaggerResponse(200, "Статус заказа успешно обновлен", typeof(OrderDto))]
         [SwaggerResponse(404, "Заказ не найден")]
         public async Task<ActionResult<OrderDto>> UpdateOrderStatus(Guid id, OrderStatusUpdateDto statusUpdateDto)
         {
@@ -203,15 +207,16 @@ namespace Caffe.Controllers
                 PaymentMethod = updatedOrder.paymentMethod,
                 TotalPrice = updatedOrder.Cart?.totalPrice,
                 CreatedAt = updatedOrder.CreatedAt,
-                Items = updatedOrder.Cart?.Items?.Select(item => new MenuItemDto
+                Items = updatedOrder.Cart?.Items?.Select(item => new MenuCartItemDto
                 {
-                    Id = item.Id,
-                    Title = item.title,
-                    Description = item.description,
-                    Price = item.price,
-                    ImageUrl = item.img,
-                    IsAvailable = item.is_availble
-                }).ToList() ?? new List<MenuItemDto>()
+                    Id = item.MenuItem.Id,
+                    Title = item.MenuItem.title,
+                    Description = item.MenuItem.description,
+                    Price = item.MenuItem.price,
+                    ImageUrl = item.MenuItem.img,
+                    IsAvailable = item.MenuItem.is_availble,
+                    Quantity = item.Quantity
+                }).ToList() ?? new List<MenuCartItemDto>()
             };
 
             return Ok(orderDto);
@@ -219,7 +224,7 @@ namespace Caffe.Controllers
 
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Удалить заказ", Description = "Удаляет заказ по его идентификатору.")]
-        [SwaggerResponse(200, "Заказ успешно удален")]
+        [SwaggerResponse(204, "Заказ успешно удален")]
         [SwaggerResponse(404, "Заказ не найден")]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {

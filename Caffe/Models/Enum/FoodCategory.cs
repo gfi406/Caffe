@@ -7,7 +7,7 @@
         Soup = 3,          // Супы
         Salad = 4,         // Салаты
         Dessert = 5,       // Десерты
-        Beverage = 6,      // Напитки
+        Beverage = 6      // Напитки
         
     }
 }
