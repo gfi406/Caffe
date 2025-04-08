@@ -2,20 +2,20 @@ version: '3.8'
 
 services:
 
-  # domain:
-  #     build:
-  #       context: .
-  #       dockerfile: Dockerfile
-  #     container_name: domain
-  #     ports:
-  #       - "5253:8080"
-  #     depends_on:
-  #       - postgres-db
-  #     networks:
-  #       - prescription-network
-  #     # environment:
-  #     #   - ASPNETCORE_ENVIRONMENT=Production
-  #     #   - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=cafe;Username=gif;Password=123456
+  domain:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: domain
+      ports:
+        - "5253:8080"
+      depends_on:
+        - postgres-db
+      networks:
+        - prescription-network
+      # environment:
+      #   - ASPNETCORE_ENVIRONMENT=Production
+      #   - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=cafe;Username=gif;Password=123456
 
 
   # Redis - кэширование

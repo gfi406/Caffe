@@ -40,6 +40,7 @@ namespace Caffe.Controllers
             {
                 return NotFound();
             }
+            var cartItems = await _cartItemService.GetCartItemsByCartIdAsync(cart.Id);
 
             var cartDto = new CartDto
             {
@@ -47,17 +48,20 @@ namespace Caffe.Controllers
                 UserId = cart.user_id,
                 TotalPrice = cart.totalPrice,
                 OrderId = cart.Order?.Id,
-                Items = cart.Items?.Select(item => new MenuCartItemDto
-                {
-                    Id = item.MenuItem.Id,
-                    Title = item.MenuItem.title,
-                    Description = item.MenuItem.description,
-                    Price = item.MenuItem.price,
-                    ImageUrl = item.MenuItem.img,
-                    IsAvailable = item.MenuItem.is_availble,
-                    Category = item.MenuItem.category,
-                    Quantity = item.Quantity
-                }).ToList() ?? new List<MenuCartItemDto>()
+                Items = cartItems?
+                    .Where(item => item.MenuItem != null)
+                    .Select(item => new MenuCartItemDto
+                    {
+                        Id = item.MenuItem?.Id ?? Guid.Empty,
+                        Title = item.MenuItem?.title ?? "Название не указано",
+                        Description = item.MenuItem?.description ?? string.Empty,
+                        Price = item.MenuItem?.price ?? 0,
+                        ImageUrl = item.MenuItem?.img,
+                        IsAvailable = item.MenuItem?.is_availble ?? false,
+                        Category = item.MenuItem?.category ?? 0,
+                        Quantity = item.Quantity
+                    })
+                    .ToList() ?? new List<MenuCartItemDto>()
             };
 
             return Ok(cartDto);
@@ -300,6 +304,43 @@ namespace Caffe.Controllers
                     ImageUrl = item.MenuItem?.img
                 }).ToList() ?? new List<MenuCartItemDto>()
             };
+        }
+        [HttpDelete("user/{userId}/remove-item/{itemId}")]
+        [SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины по его идентификатору.")]
+        [SwaggerResponse(200, "Товар успешно удален", typeof(CartDto))]
+        [SwaggerResponse(404, "Товар не найден")]
+        public async Task<ActionResult<CartDto>> RemoveItemFromCart(Guid userId, Guid itemId)
+        {
+            // Получаем корзину пользователя
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                return NotFound("Корзина не найдена для пользователя");
+            }
+
+            // Находим элемент корзины
+            var cartItem = await _cartItemService.GetCartItemByIdAsync(itemId);
+            if (cartItem == null || cartItem.CartId != cart.Id)
+            {
+                return NotFound("Товар не найден в корзине");
+            }
+
+            try
+            {
+                // Удаляем элемент корзины
+                await _cartItemService.DeleteCartItemAsync(itemId);
+
+                // Обновляем общую стоимость корзины
+                await _cartService.UpdateCartTotalAsync(cart.Id);
+
+                // Получаем обновленную корзину
+                var updatedCart = await _cartService.GetCartByIdAsync(cart.Id);
+                return Ok(MapToCartDto(updatedCart));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка при удалении товара из корзины");
+            }
         }
 
         [HttpDelete("user/{userId}/clear")]

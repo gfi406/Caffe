@@ -80,6 +80,27 @@ namespace Caffe.Controllers
             return Ok(userDto);
         }
 
+        [HttpGet("recovery/{email}")]
+        [SwaggerOperation(Summary = "Востановление доступа.", Description = "Поиск пользователя по email.")]
+        [SwaggerResponse(200, "Найден email")]
+        [SwaggerResponse(401, "Не найден email")]
+        public async Task<ActionResult<User>> GetUserForRecovery(string email)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound("Пользователь с таким email не найден");
+            }
+
+            // Здесь можно добавить логику отправки письма для восстановления пароля
+            return Ok(new
+            {
+                userId = user.Id,
+                email = user.email
+                // Не возвращаем пароль и другие sensitive данные
+            });
+        }
+
         [HttpPost("login")]
         [SwaggerOperation(Summary = "Вход пользователя", Description = "Аутентификация пользователя по email и паролю.")]
         [SwaggerResponse(200, "Вход выполнен успешно", typeof(UserDto))]

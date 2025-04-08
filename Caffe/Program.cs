@@ -28,9 +28,9 @@ builder.Services.AddCors(options =>
 // ✅ Подключение к Redis
 try
 {
-     var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
+    // var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
     // for container
-    //var connection = ConnectionMultiplexer.Connect("redis:6379,abortConnect=false");
+    var connection = ConnectionMultiplexer.Connect("redis:6379,abortConnect=false");
     builder.Services.AddSingleton<IConnectionMultiplexer>(connection);
     builder.Services.AddScoped<IDatabase>(sp =>
     sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
@@ -55,6 +55,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 builder.Services.AddScoped<ICartItemService, CartItemService>();
+builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 
 // 🔹 Swagger для тестирования API
 builder.Services.AddEndpointsApiExplorer();
