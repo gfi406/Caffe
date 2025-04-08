@@ -47,7 +47,7 @@ namespace Caffe.Controllers
                 Id = cart.Id,
                 UserId = cart.user_id,
                 TotalPrice = cart.totalPrice,
-                OrderId = cart.Order?.Id,
+               // OrderId = cart.Order?.Id,
                 Items = cartItems?
                     .Where(item => item.MenuItem != null)
                     .Select(item => new MenuCartItemDto
@@ -89,7 +89,7 @@ namespace Caffe.Controllers
                 Id = cart.Id,
                 UserId = cart.user_id,
                 TotalPrice = cart.totalPrice,
-                OrderId = cart.Order?.Id,
+               // OrderId = cart.Order?.Id,
                 Items = cartItems?
                     .Where(item => item.MenuItem != null)
                     .Select(item => new MenuCartItemDto
@@ -371,7 +371,7 @@ namespace Caffe.Controllers
                 Id = updatedCart.Id,
                 UserId = updatedCart.user_id,
                 TotalPrice = updatedCart.totalPrice,
-                OrderId = updatedCart.Order?.Id,
+                //OrderId = updatedCart.Order?.Id,
                 Items = new List<MenuCartItemDto>()
             };
 

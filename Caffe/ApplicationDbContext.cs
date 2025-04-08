@@ -36,16 +36,16 @@ namespace Caffe
                 .WithMany()
                 .HasForeignKey(ci => ci.MenuItemId);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.User)
-                .WithMany(u => u.Orders)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User)
                 .HasForeignKey(o => o.user_id);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Cart)
-                .WithOne(c => c.Order)
-                .HasForeignKey<Order>(o => o.CartId);
-            
+            //modelBuilder.Entity<Order>()
+            //    .HasOne(o => o.Cart)
+            //    .WithOne(c => c.Order)
+            //    .HasForeignKey<Order>(o => o.CartId);
+
             // Order -> OrderItems (one-to-many)
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.OrderItems)

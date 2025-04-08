@@ -26,7 +26,7 @@ namespace Caffe.Service.Impl
             return await _context.Carts
                 .Include(c => c.Items)
                 .Include(c => c.User)
-                .Include(c => c.Order)
+                //.Include(c => c.Order)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
@@ -99,7 +99,7 @@ namespace Caffe.Service.Impl
             return await _context.Carts
                 .Include(c => c.Items)
                 .Include(c => c.User)
-                .Include(c => c.Order)
+                //.Include(c => c.Order)
                 .FirstOrDefaultAsync(c => c.user_id == userId);
         }
     }

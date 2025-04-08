@@ -85,7 +85,6 @@ namespace Caffe.Service.Impl
         public async Task<List<Order>> GetOrdersByUserIdAsync(Guid userId)
         {
             return await _context.Orders
-                .Include(o => o.Cart)
                 .Include(o => o.User)
                 .Where(o => o.user_id == userId)
                 .ToListAsync();

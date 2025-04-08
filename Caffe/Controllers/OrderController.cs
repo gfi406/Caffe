@@ -105,8 +105,7 @@ namespace Caffe.Controllers
 
             var order = new Order
             {
-                CartId = orderCreateDto.CartId,
-                user_id = cart.user_id,
+                user_id = cart.user_id, // Связываем с пользователем, а не с корзиной
                 status = "В обработке",
                 paymentMethod = orderCreateDto.PaymentMethod,
                 orderNumber = GenerateOrderNumber()
@@ -115,7 +114,7 @@ namespace Caffe.Controllers
             var createdOrder = await _orderService.AddOrderAsync(order);
             await _orderItemService.CreateOrderItemsFromCartItems(createdOrder.Id, cart.Id);
 
-            // Очищаем корзину
+            // Очищаем корзину (но не удаляем ее)
             await _cartItemService.ClearCartAsync(cart.Id);
             cart.totalPrice = 0;
             await _cartService.UpdateCartAsync(cart);
@@ -169,7 +168,7 @@ namespace Caffe.Controllers
             return new OrderDto
             {
                 Id = order.Id,
-                CartId = order.CartId,
+               
                 UserId = order.user_id,
                 Status = order.status,
                 OrderNumber = order.orderNumber,
