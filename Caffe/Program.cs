@@ -11,10 +11,8 @@ Console.WriteLine("Started");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 🔹 Добавление контроллеров
 builder.Services.AddControllers();
 
-// 🔹 Добавление CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -25,7 +23,6 @@ builder.Services.AddCors(options =>
 });
 
 
-// ✅ Подключение к Redis
 try
 {
     // var connection = ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false");
@@ -42,14 +39,12 @@ catch (Exception ex)
 }
 
 
-// 🔹 Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations();
     options.DocInclusionPredicate((docName, apiDesc) => true);
 });
 
-// 🔹 Регистрация сервисов
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICartService, CartService>();
@@ -57,7 +52,6 @@ builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 
-// 🔹 Swagger для тестирования API
 builder.Services.AddEndpointsApiExplorer();
 
 Console.WriteLine("Building...");
@@ -67,7 +61,6 @@ Console.WriteLine("✅ Building complete!");
 app.UseRouting();
 Console.WriteLine("✅ Routing configured!");
 
-// 🔹 Инициализация базы данных
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -92,14 +85,12 @@ app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Notes API");
-    options.RoutePrefix = string.Empty;  // Swagger будет доступен на корневом пути
+    options.RoutePrefix = string.Empty;  
 });
 
 
-// 🔹 Применение CORS
 app.UseCors("AllowAll");
 
-// 🔹 Маршрутизация
 app.UseRouting();
 
 app.MapControllers();

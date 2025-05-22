@@ -92,12 +92,12 @@ namespace Caffe.Controllers
                 return NotFound("Пользователь с таким email не найден");
             }
 
-            // Здесь можно добавить логику отправки письма для восстановления пароля
+           
             return Ok(new
             {
                 userId = user.Id,
                 email = user.email
-                // Не возвращаем пароль и другие sensitive данные
+                
             });
         }
 
@@ -107,7 +107,7 @@ namespace Caffe.Controllers
         [SwaggerResponse(401, "Неверный email или пароль")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            // Предполагается, что в IUserService есть метод для проверки учетных данных
+           
             var user = await _userService.AuthenticateUserAsync(loginDto.Email, loginDto.Password);
 
             if (user == null)
@@ -149,11 +149,11 @@ namespace Caffe.Controllers
 
             var createdUser = await _userService.AddUserAsync(user);
 
-            // Создаем корзину для нового пользователя
+            
             var cart = new Cart
             {
                 user_id = createdUser.Id,
-                Items = new List<CartItem>(), // Пустая корзина
+                Items = new List<CartItem>(), 
                 totalPrice = 0
             };
 
@@ -184,7 +184,7 @@ namespace Caffe.Controllers
                 return BadRequest("Файл не выбран");
             }
 
-            // Разрешенные типы
+            
             var allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png" };
             var allowedContentTypes = new List<string> { "image/jpeg", "image/png" };
 
@@ -233,10 +233,10 @@ namespace Caffe.Controllers
             existingUser.is_admin = userUpdateDto.IsAdmin;
             existingUser.is_active = userUpdateDto.IsActive;
 
-            // Only update password if it's provided
+           
             if (!string.IsNullOrEmpty(userUpdateDto.Password))
             {
-                existingUser.password = userUpdateDto.Password; // Should be hashed in production
+                existingUser.password = userUpdateDto.Password; 
             }
 
             var updatedUser = await _userService.UpdateUserAsync(existingUser);
@@ -273,21 +273,21 @@ namespace Caffe.Controllers
         }
         public static void SaveImageFromBytes(byte[] imageBytes, string outputPath)
         {
-            // Проверяем, что массив байтов не пустой
+            
             if (imageBytes == null || imageBytes.Length == 0)
             {
                 throw new ArgumentException("The byte array is empty or null.", nameof(imageBytes));
             }
 
-            // Создаем поток из байтов
+            
             using (var ms = new MemoryStream(imageBytes))
             {
                 try
                 {
-                    // Указываем полное имя класса Image для работы с изображениями
+                    
                     var image = System.Drawing.Image.FromStream(ms);
 
-                    // Сохраняем изображение в файл
+                    
                     image.Save(outputPath);
                 }
                 catch (Exception ex)

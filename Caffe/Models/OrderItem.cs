@@ -11,6 +11,6 @@ namespace Caffe.Models
         public MenuItem MenuItem { get; set; }
 
         public int Quantity { get; set; }
-        public int PriceAtOrderTime { get; set; } // Сохраняем цену на момент заказа
+        public int PriceAtOrderTime { get; set; }
     }
 }

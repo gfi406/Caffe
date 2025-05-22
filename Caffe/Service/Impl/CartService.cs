@@ -15,9 +15,9 @@ namespace Caffe.Service.Impl
         public async Task<List<Cart>> GetCartsAsync()
         {
             return await _context.Carts
-                //.Include(c => c.Items)   // Включаем элементы корзины
-                //.Include(c => c.User)    // Включаем информацию о пользователе
-                //.Include(c => c.Order)   // Включаем информацию о заказе
+                //.Include(c => c.Items)   
+                //.Include(c => c.User)    
+                //.Include(c => c.Order)   
                 .ToListAsync();
         }
 
@@ -61,12 +61,12 @@ namespace Caffe.Service.Impl
 
             if (existingItem != null)
             {
-                // Обновляем количество существующего элемента
+                
                 existingItem.Quantity += quantity;
             }
             else
             {
-                // Создаем новый элемент корзины
+               
                 existingItem = new CartItem
                 {
                     CartId = cartId,

@@ -15,8 +15,8 @@ namespace Caffe.Service.Impl
         public async Task<List<User>> GetUsersAsync()
         {
             return await _context.Users
-                .Include(u => u.Cart)           // Включаем корзину пользователя
-                .Include(u => u.Orders)         // Включаем заказы пользователя
+                .Include(u => u.Cart)           
+                .Include(u => u.Orders)        
                 .ToListAsync();
         }
 
@@ -27,7 +27,7 @@ namespace Caffe.Service.Impl
                 return null;
             }
 
-            // Найти пользователя по email
+           
             var user = await _context.Users
                 .Include(u => u.Cart)
                 .Include(u => u.Orders)

@@ -15,7 +15,7 @@ namespace Caffe.Service.Impl
         public async Task<List<Order>> GetOrdersAsync()
         {
             return await _context.Orders    
-                .Include(o => o.User)         // Включаем информацию о пользователе
+                .Include(o => o.User)         
                 .ToListAsync();
         }
 

@@ -73,17 +73,14 @@ namespace Caffe.Controllers
         [SwaggerResponse(404, "Корзина не найдена")]
         public async Task<ActionResult<CartDto>> GetCartByUserId(Guid userId)
         {
-            // Получаем корзину без элементов (только основную информацию)
             var cart = await _cartService.GetCartByUserIdAsync(userId);
             if (cart == null)
             {
                 return NotFound("Корзина не найдена");
             }
 
-            // Получаем элементы корзины с полной информацией о товарах
             var cartItems = await _cartItemService.GetCartItemsByCartIdAsync(cart.Id);
 
-            // Маппим в DTO с защитой от null
             var cartDto = new CartDto
             {
                 Id = cart.Id,
@@ -109,125 +106,7 @@ namespace Caffe.Controllers
             return Ok(cartDto);
         }
 
-        //[HttpPost("user/{userId}/add-item")]
-        //[SwaggerOperation(Summary = "Добавить товар в корзину", Description = "Добавляет товар в корзину пользователя.")]
-        //[SwaggerResponse(201, "Товар успешно добавлен", typeof(CartDto))]
-        //[SwaggerResponse(400, "Ошибка при добавлении товара")]
-        //public async Task<ActionResult<CartDto>> AddItemToCart(Guid userId, AddToCartDto addToCartDto)
-        //{
-        //    var cart = await _cartService.GetCartByUserIdAsync(userId);
-        //    if (cart == null)
-        //    {
-        //        return NotFound("Корзина не найдена для пользователя");
-        //    }
-
-        //    var menuItem = await _menuItemService.GetMenuItemByIdAsync(addToCartDto.MenuItemId);
-        //    if (menuItem == null)
-        //    {
-        //        return NotFound("Товар не найден");
-        //    }
-
-        //    // Проверяем, есть ли уже такой товар в корзине
-        //    var existingCartItem = cart.Items?.FirstOrDefault(i => i.MenuItemId == addToCartDto.MenuItemId);
-
-        //    if (existingCartItem != null)
-        //    {
-        //        // Увеличиваем количество существующего товара
-        //        existingCartItem.Quantity += addToCartDto.Quantity;
-        //    }
-        //    else
-        //    {
-        //        // Создаем новый элемент корзины
-        //        var newCartItem = new CartItem
-        //        {
-        //            CartId = cart.Id,
-        //            MenuItemId = menuItem.Id,
-        //            Quantity = addToCartDto.Quantity
-        //        };
-
-        //        if (cart.Items == null)
-        //        {
-        //            cart.Items = new List<CartItem>();
-        //        }
-
-        //        cart.Items.Add(newCartItem);
-        //    }
-
-        //    // Пересчитываем общую стоимость
-        //    cart.totalPrice = cart.Items.Sum(item => item.MenuItem.price * item.Quantity);
-
-        //    var updatedCart = await _cartService.UpdateCartAsync(cart);
-
-        //    var cartDto = new CartDto
-        //    {
-        //        Id = updatedCart.Id,
-        //        UserId = updatedCart.user_id,
-        //        TotalPrice = updatedCart.totalPrice,
-        //        OrderId = updatedCart.Order?.Id,
-        //        Items = updatedCart.Items?.Select(item => new MenuCartItemDto
-        //        {
-        //            Id = item.MenuItem.Id,
-        //            Title = item.MenuItem.title,
-        //            Description = item.MenuItem.description,
-        //            Price = item.MenuItem.price,
-        //            ImageUrl = item.MenuItem.img,
-        //            IsAvailable = item.MenuItem.is_availble,
-        //            Category = item.MenuItem.category,
-        //            Quantity = item.Quantity
-        //        }).ToList() ?? new List<MenuCartItemDto>()
-        //    };
-
-        //    return Ok(cartDto);
-        //}
-
-        //[HttpDelete("user/{userId}/remove-item/{itemId}")]
-        //[SwaggerOperation(Summary = "Удалить товар из корзины", Description = "Удаляет товар из корзины по его идентификатору.")]
-        //[SwaggerResponse(200, "Товар успешно удален")]
-        //[SwaggerResponse(404, "Товар не найден")]
-        //public async Task<ActionResult<CartDto>> RemoveItemFromCart(Guid userId, Guid itemId)
-        //{
-        //    var cart = await _cartService.GetCartByUserIdAsync(userId);
-        //    if (cart == null)
-        //    {
-        //        return NotFound("Корзина не найдена для пользователя");
-        //    }
-
-        //    // Находим и удаляем товар из корзины
-        //    var itemToRemove = cart.Items?.FirstOrDefault(i => i.Id == itemId);
-        //    if (itemToRemove == null)
-        //    {
-        //        return NotFound("Товар не найден в корзине");
-        //    }
-
-        //    cart.Items.Remove(itemToRemove);
-        //    await _cartItemService.DeleteCartItemAsync(itemId);
-
-        //    // Пересчитываем общую стоимость
-        //    cart.totalPrice = cart.Items?.Sum(item => item.MenuItem.price * item.Quantity) ?? 0;
-
-        //    var updatedCart = await _cartService.UpdateCartAsync(cart);
-
-        //    var cartDto = new CartDto
-        //    {
-        //        Id = updatedCart.Id,
-        //        UserId = updatedCart.user_id,
-        //        TotalPrice = updatedCart.totalPrice,
-        //        OrderId = updatedCart.Order?.Id,
-        //        Items = updatedCart.Items?.Select(item => new MenuCartItemDto
-        //        {
-        //            Id = item.MenuItem.Id,
-        //            Title = item.MenuItem.title,
-        //            Description = item.MenuItem.description,
-        //            Price = item.MenuItem.price,
-        //            ImageUrl = item.MenuItem.img,
-        //            IsAvailable = item.MenuItem.is_availble,
-        //            Category = item.MenuItem.category,
-        //            Quantity = item.Quantity
-        //        }).ToList() ?? new List<MenuCartItemDto>()
-        //    };
-
-        //    return Ok(cartDto);
-        //}
+       
         [HttpPost("user/{userId}/add-item")]
         [SwaggerOperation(Summary = "Добавить товар в корзину", Description = "Добавляет товар в корзину пользователя.")]
         [SwaggerResponse(201, "Товар успешно добавлен", typeof(CartDto))]
@@ -235,27 +114,23 @@ namespace Caffe.Controllers
         
         public async Task<ActionResult<CartDto>> AddItemToCart(Guid userId, AddToCartDto addToCartDto)
         {
-            // Валидация входных данных
             if (addToCartDto.Quantity <= 0)
             {
                 return BadRequest("Количество должно быть больше нуля");
             }
 
-            // Получаем или создаем корзину
             var cart = await _cartService.GetCartByUserIdAsync(userId);
             if (cart == null)
             {
                 return BadRequest("Не удалось создать корзину");
             }
 
-            // Получаем товар из меню
             var menuItem = await _menuItemService.GetMenuItemByIdAsync(addToCartDto.MenuItemId);
             if (menuItem == null)
             {
                 return NotFound("Товар не найден");
             }
 
-            // Проверяем доступность товара
             if (!menuItem.is_availble)
             {
                 return BadRequest("Товар временно недоступен");
@@ -263,23 +138,19 @@ namespace Caffe.Controllers
 
             try
             {
-                // Добавляем товар в корзину
                 var cartItem = await _cartService.AddItemToCartAsync(
                     cart.Id,
                     menuItem.Id,
                     addToCartDto.Quantity,
                     menuItem.price);
 
-                // Обновляем общую стоимость корзины
                 await _cartService.UpdateCartTotalAsync(cart.Id);
 
-                // Возвращаем обновленную корзину
                 var updatedCart = await _cartService.GetCartByIdAsync(cart.Id);
                 return Ok(MapToCartDto(updatedCart));
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                // Обработка конфликта параллельного доступа
                 return Conflict("Произошел конфликт при обновлении данных. Попробуйте еще раз.");
             }
             catch (Exception ex)
@@ -311,14 +182,12 @@ namespace Caffe.Controllers
         [SwaggerResponse(404, "Товар не найден")]
         public async Task<ActionResult<CartDto>> RemoveItemFromCart(Guid userId, Guid itemId)
         {
-            // Получаем корзину пользователя
             var cart = await _cartService.GetCartByUserIdAsync(userId);
             if (cart == null)
             {
                 return NotFound("Корзина не найдена для пользователя");
             }
 
-            // Находим элемент корзины
             var cartItem = await _cartItemService.GetCartItemByIdAsync(itemId);
             if (cartItem == null || cartItem.CartId != cart.Id)
             {
@@ -327,13 +196,10 @@ namespace Caffe.Controllers
 
             try
             {
-                // Удаляем элемент корзины
                 await _cartItemService.DeleteCartItemAsync(itemId);
 
-                // Обновляем общую стоимость корзины
                 await _cartService.UpdateCartTotalAsync(cart.Id);
 
-                // Получаем обновленную корзину
                 var updatedCart = await _cartService.GetCartByIdAsync(cart.Id);
                 return Ok(MapToCartDto(updatedCart));
             }
