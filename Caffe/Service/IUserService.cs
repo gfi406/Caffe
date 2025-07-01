@@ -11,7 +11,7 @@ namespace Caffe.Service
         Task<User> UpdateUserAsync(User user);
         Task DeleteUserAsync(Guid id);
         Task<User> GetUserByEmailAsync(string email);
-        Task<List<Order>> GetOrdersByUserIdAsync(Guid userId);
+        Task<List<Order>> GetOrdersByUserIdAsync(Guid userId);        
         Task<Cart> GetCartByUserIdAsync(Guid userId);
     }
 }

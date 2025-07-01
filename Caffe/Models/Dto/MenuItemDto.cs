@@ -11,5 +11,6 @@ namespace Caffe.Models.Dto
         public string ImageUrl { get; set; }
         public int Price { get; set; }
         public FoodCategory Category { get; set; }
+        //public int Quantity { get; set; }
     }
 }

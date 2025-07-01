@@ -14,16 +14,14 @@ namespace Caffe.Service.Impl
 
         public async Task<List<Order>> GetOrdersAsync()
         {
-            return await _context.Orders
-                .Include(o => o.Cart)         // Включаем информацию о корзине
-                .Include(o => o.User)         // Включаем информацию о пользователе
+            return await _context.Orders    
+                .Include(o => o.User)         
                 .ToListAsync();
         }
 
         public async Task<Order> GetOrderByIdAsync(Guid id)
         {
             return await _context.Orders
-                .Include(o => o.Cart)
                 .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
@@ -55,19 +53,18 @@ namespace Caffe.Service.Impl
         public async Task<List<Order>> GetOrdersByUserIdAsync(Guid userId)
         {
             return await _context.Orders
-                .Include(o => o.Cart)
                 .Include(o => o.User)
                 .Where(o => o.user_id == userId)
                 .ToListAsync();
         }
 
-        public async Task<List<Order>> GetOrdersByCartIdAsync(Guid cartId)
-        {
-            return await _context.Orders
-                .Include(o => o.Cart)
-                .Include(o => o.User)
-                .Where(o => o.CartId == cartId)
-                .ToListAsync();
-        }
+        //public async Task<List<Order>> GetOrdersByCartIdAsync(Guid cartId)
+        //{
+        //    return await _context.Orders
+        //        .Include(o => o.Cart)
+        //        .Include(o => o.User)
+        //        .Where(o => o.CartId == cartId)
+        //        .ToListAsync();
+        //}
     }
 }

@@ -12,6 +12,8 @@ namespace Caffe
         public DbSet<Order> Orders { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
 
 
@@ -26,17 +28,35 @@ namespace Caffe
 
             modelBuilder.Entity<Cart>()
                 .HasMany(c => c.Items)
-                .WithOne();
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.User)
-                .WithMany(u => u.Orders)
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.MenuItem)
+                .WithMany()
+                .HasForeignKey(ci => ci.MenuItemId);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User)
                 .HasForeignKey(o => o.user_id);
 
+            //modelBuilder.Entity<Order>()
+            //    .HasOne(o => o.Cart)
+            //    .WithOne(c => c.Order)
+            //    .HasForeignKey<Order>(o => o.CartId);
+
+            // Order -> OrderItems (one-to-many)
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.Cart)
-                .WithOne(c => c.Order)
-                .HasForeignKey<Order>(o => o.CartId);
+                .HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId);
+
+            // OrderItem -> MenuItem (many-to-one)
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.MenuItem)
+                .WithMany()
+                .HasForeignKey(oi => oi.MenuItemId);
 
 
         }

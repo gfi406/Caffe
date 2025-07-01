@@ -10,6 +10,6 @@ namespace Caffe.Models
         public String description { get; set; }
         public String img { get; set; }
         public int price { get; set; }
-        public FoodCategory category { get; set; }
+       public FoodCategory category { get; set; }
     }
 }
